@@ -14,6 +14,7 @@ return {
       "python",
       "bash",
       "markdown",
+      "c_sharp",
     },
   },
 }

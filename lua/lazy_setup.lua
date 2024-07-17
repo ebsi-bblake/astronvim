@@ -10,9 +10,39 @@ require("lazy").setup({
       pin_plugins = nil,
       update_notifications = true,
     },
+    lsp = {
+      formatting = {
+        timeout_ms = 5000,
+      },
+    },
   },
   { import = "community" },
   { import = "plugins" },
+
+  -- Language Support
+  -- Added this plugin.
+  {
+    "VonHeikemen/lsp-zero.nvim",
+    branch = "v1.x",
+    dependencies = {
+      -- LSP Support
+      { "neovim/nvim-lspconfig" }, -- Required
+      { "williamboman/mason.nvim" }, -- Optional
+      { "williamboman/mason-lspconfig.nvim" }, -- Optional
+
+      -- Autocompletion
+      { "hrsh7th/nvim-cmp" }, -- Required
+      { "hrsh7th/cmp-nvim-lsp" }, -- Required
+      { "hrsh7th/cmp-buffer" }, -- Optional
+      { "hrsh7th/cmp-path" }, -- Optional
+      { "saadparwaiz1/cmp_luasnip" }, -- Optional
+      { "hrsh7th/cmp-nvim-lua" }, -- Optional
+
+      -- Snippets
+      { "L3MON4D3/LuaSnip" }, -- Required
+      { "rafamadriz/friendly-snippets" }, -- Optional
+    },
+  },
   {
     "mhartington/formatter.nvim",
     config = function()
@@ -23,7 +53,23 @@ require("lazy").setup({
             function()
               return {
                 exe = "prettier",
-                args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote" },
+                args = {
+                  "--config-precedence",
+                  "prefer-file",
+                  "--single-quote",
+                  "--no-bracket-spacing",
+                  "--prose-wrap",
+                  "always",
+                  "--arrow-parens",
+                  "avoid",
+                  "--trailing-comma",
+                  "all",
+                  "--no-semi",
+                  "--end-of-line",
+                  "lf",
+                  "--stdin-filepath",
+                  vim.fn.shellescape(vim.api.nvim_buf_get_name(0)),
+                },
                 stdin = true,
               }
             end,
@@ -32,7 +78,23 @@ require("lazy").setup({
             function()
               return {
                 exe = "prettier",
-                args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0), "--single-quote" },
+                args = {
+                  "--config-precedence",
+                  "prefer-file",
+                  "--single-quote",
+                  "--no-bracket-spacing",
+                  "--prose-wrap",
+                  "always",
+                  "--arrow-parens",
+                  "avoid",
+                  "--trailing-comma",
+                  "all",
+                  "--no-semi",
+                  "--end-of-line",
+                  "lf",
+                  "--stdin-filepath",
+                  vim.fn.shellescape(vim.api.nvim_buf_get_name(0)),
+                },
                 stdin = true,
               }
             end,
@@ -56,7 +118,6 @@ require("lazy").setup({
 
       -- Create an augroup for formatting
       local format_group = vim.api.nvim_create_augroup("FormatAutogroup", { clear = true })
-
       -- Create an autocmd to format with Prettier on save
       vim.api.nvim_create_autocmd("BufWritePre", {
         group = format_group,
@@ -72,6 +133,16 @@ require("lazy").setup({
       "nvim-lua/plenary.nvim",
     },
     config = function() require("telescope").load_extension "lazygit" end,
+  },
+  {
+    "kelly-lin/telescope-ag",
+    dependencies = { "nvim-telescope/telescope.nvim" },
+    config = function()
+      local telescope_ag = require "telescope-ag"
+      telescope_ag.setup {
+        cmd = telescope_ag.cmds.rg, -- defaults to telescope_ag.cmds.ag
+      }
+    end,
   },
   -- Add Nord colorscheme
   {
