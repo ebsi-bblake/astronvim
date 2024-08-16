@@ -26,7 +26,9 @@ require("lazy").setup({
     branch = "v1.x",
     dependencies = {
       -- LSP Support
-      { "neovim/nvim-lspconfig" }, -- Required
+      {
+        "neovim/nvim-lspconfig",
+      }, -- Required
       { "williamboman/mason.nvim" }, -- Optional
       { "williamboman/mason-lspconfig.nvim" }, -- Optional
 
@@ -141,6 +143,32 @@ require("lazy").setup({
       local telescope_ag = require "telescope-ag"
       telescope_ag.setup {
         cmd = telescope_ag.cmds.rg, -- defaults to telescope_ag.cmds.ag
+      }
+    end,
+  },
+  {
+    "klen/nvim-test",
+    config = function()
+      require("nvim-test").setup {
+        size = 20,
+        open_mapping = [[<c-\>]],
+        hide_numbers = true,
+        shade_filetypes = {},
+        shade_terminals = true,
+        shading_factor = 2,
+        start_in_insert = true,
+        insert_mappings = true,
+        terminal_mappings = true,
+        persist_size = true,
+        direction = "float",
+        close_on_exit = true,
+        shell = vim.o.shell,
+        float_opts = {
+          border = "single",
+          width = 120,
+          height = 30,
+          winblend = 3,
+        },
       }
     end,
   },

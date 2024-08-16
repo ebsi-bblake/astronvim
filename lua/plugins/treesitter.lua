@@ -15,6 +15,7 @@ return {
       "bash",
       "markdown",
       "c_sharp",
+      "jsonc",
     },
   },
 }

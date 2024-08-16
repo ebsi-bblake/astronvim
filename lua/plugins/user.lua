@@ -82,4 +82,31 @@ return {
       )
     end,
   },
+
+  {
+    "vim-test/vim-test",
+    config = function() vim.cmd [[ let test#strategy = "toggleterm" ]] end,
+  },
+  {
+    "akinsho/nvim-toggleterm.lua",
+    config = function()
+      require("toggleterm").setup {
+        open_mapping = [[<c-\>]],
+        direction = "float",
+        float_opts = {
+          border = "curved",
+        },
+      }
+    end,
+  },
+  mappings = {
+    n = {
+      -- Test commands
+      ["<leader>tn"] = ":TestNearest<CR>",
+      ["<leader>tf"] = ":TestFile<CR>",
+      ["<leader>ts"] = ":TestSuite<CR>",
+      ["<leader>tl"] = ":TestLast<CR>",
+      ["<leader>tv"] = ":TestVisit<CR>",
+    },
+  },
 }
