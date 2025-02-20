@@ -1,18 +1,11 @@
-if true then return end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
-
--- This will run last in the setup process and is a good place to configure
--- things like custom filetypes. This just pure lua so anything that doesn't
--- fit in the normal config locations above can go here
-
--- Set up custom filetypes
-vim.filetype.add {
-  extension = {
-    foo = "fooscript",
-  },
-  filename = {
-    ["Foofile"] = "fooscript",
-  },
-  pattern = {
-    ["~/%.config/foo/.*"] = "fooscript",
-  },
-}
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--   pattern = { "*.js", "*.ts", "*.vue", "*.py" }, -- Add other file types as needed
+--   callback = function()
+--     local formatter = require("formatter")
+--     if formatter and formatter.format then
+--       formatter.format()
+--     else
+--       print("Formatter not loaded or format function is nil")
+--     end
+--   end,
+-- })

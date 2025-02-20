@@ -6,12 +6,25 @@
 
 ---@type LazySpec
 return {
+  -- Import the AstroNvim community modules
   "AstroNvim/astrocommunity",
+
+  -- Example of importing a specific community pack
   -- { import = "astrocommunity.pack.lua" },
+
+  -- User-specific plugins
   {
-    "mg979/vim-visual-multi",
+    "mg979/vim-visual-multi", -- Multi-cursor plugin for Vim
     branch = "master",
   },
-
-  -- import/override with your plugins folder
+  {
+    {
+      "Isrothy/neominimap.nvim",
+      config = function()
+        vim.g.neominimap_width = 10     -- Set minimap width
+        vim.g.neominimap_auto_start = 1 -- Automatically start the minimap on launch
+      end,
+    },
+  },
+  -- Additional user plugins or overrides can be added here
 }

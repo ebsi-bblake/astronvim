@@ -1,113 +1,105 @@
---if true then return {} end -- WARN: REMOVE THIS LINE TO ACTIVATE THIS FILE
-local null_ls = require "null-ls"
--- Customize Mason plugins
 ---@type LazySpec
 return {
-  -- use mason-lspconfig to configure LSP installations
+  -- Mason setup for managing LSPs, formatters, and linters
+  {
+    "williamboman/mason.nvim",
+    opts = function() require("mason").setup() end,
+  },
+
+  -- Setup mason-lspconfig for LSP installations
   {
     "williamboman/mason-lspconfig.nvim",
-    -- overrides `require("mason-lspconfig").setup(...)`
     opts = {
       ensure_installed = {
         "lua_ls",
-        -- add more arguments for adding more language servers
+        "cssls",
+        "html",
+        "jsonls",
+        "vimls",
+        "angularls",
+        "bashls",
+        "dockerls",
+        "emmet_ls",
+        "marksman",
+        "sqlls",
+        "tailwindcss",
+        "yamlls",
       },
     },
   },
-  -- use mason-null-ls to configure Formatters/Linter installation for null-ls sources
+
+  -- Setup mason-null-ls to install formatters and linters
   {
-    "jay-babu/mason-null-ls.nvim",
-    -- overrides `require("mason-null-ls").setup(...)`
+    "williamboman/mason-null-ls.nvim",
     opts = {
-      ensure_installed = {
-        "stylua",
-        "black",
-        "isort",
-        -- add more arguments for adding more null-ls sources
-      },
-      automatic_installation = true,
-    },
-    sources = {
-      null_ls.builtins.formatting.isort.with { extra_args = { "--profile", "black" } },
-      null_ls.builtins.formatting.black.with { extra_args = { "--line-length", "88" } },
-      -- Add other formatters or linters if needed
+      ensure_installed = { "prettierd", "eslint_d", "stylua" }, -- Ensure these tools are installed
     },
   },
+  -- Copilot for Neovim
   {
-    "jay-babu/mason-nvim-dap.nvim",
-    -- overrides `require("mason-nvim-dap").setup(...)`
-    opts = {
-      ensure_installed = {
-        "python",
-        "tsserver",
-        -- add more arguments for adding more debuggers
-      },
-    },
+    "github/copilot.vim",
+    config = function()
+      vim.g.copilot_no_tab_map = true
+      vim.api.nvim_set_keymap("i", "<C-J>", 'copilot#Accept("<CR>")', { silent = true, expr = true })
+    end,
   },
-  -- Correctly setup lspconfig for C# 🚀
+  -- LSP Configurations
   {
     "neovim/nvim-lspconfig",
-    opts = {
-      servers = {
-        -- Ensure mason installs the server
-        omnisharp = {},
-        tsserver = {},
-      },
-      -- configure omnisharp to fix the semantic tokens bug (really annoying)
-      setup = {
-        omnisharp = function(_, _)
-          require("lazyvim.util").on_attach(function(client, _)
-            if client.name == "omnisharp" then
-              ---@type string[]
-              local tokenModifiers = client.server_capabilities.semanticTokensProvider.legend.tokenModifiers
-              for i, v in ipairs(tokenModifiers) do
-                tokenModifiers[i] = v:gsub(" ", "_")
-              end
-              ---@type string[]
-              local tokenTypes = client.server_capabilities.semanticTokensProvider.legend.tokenTypes
-              for i, v in ipairs(tokenTypes) do
-                tokenTypes[i] = v:gsub(" ", "_")
-              end
-            end
-          end)
-          return false
-        end,
+    config = function()
+      local lspconfig = require("lspconfig")
+      local null_ls = require("null-ls")
 
-        tsserver = {
-          on_attach = function(client, bufnr)
-            local vim = require "vim"
-            local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-            -- Mappings.
-            local opts = { noremap = true, silent = true }
+      -- Setup null-ls for Prettier (formatting) and ESLint (linting)
+      null_ls.setup({
+        sources = {
+          -- Prettier for formatting Vue, JavaScript, TypeScript, HTML, etc.
+          null_ls.builtins.formatting.prettierd.with({
+            filetypes = { "javascript", "typescript", "vue", "html", "css", "json", "ts", "js" }, -- Ensure Vue is properly handled
+            extra_args = { "--single-quote" },                                                    -- Force single quotes if needed
+          }),
 
-            -- See `:help vim.lsp.*` for documentation on any of the below functions
-            buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
-            buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
-            buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
-            buf_set_keymap("n", "gi", "<Cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-            buf_set_keymap("n", "<C-k>", "<Cmd>lua vim.lsp.buf.signature_help()<CR>", opts)
-            buf_set_keymap("n", "<space>wa", "<Cmd>lua vim.lsp.buf.add_workspace_folder()<CR>", opts)
-            buf_set_keymap("n", "<space>wr", "<Cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>", opts)
-            buf_set_keymap(
-              "n",
-              "<space>wl",
-              "<Cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>",
-              opts
-            )
-            buf_set_keymap("n", "<space>D", "<Cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-            buf_set_keymap("n", "<space>rn", "<Cmd>lua vim.lsp.buf.rename()<CR>", opts)
-            buf_set_keymap("n", "gr", "<Cmd>lua vim.lsp.buf.references()<CR>", opts)
-            buf_set_keymap("n", "<space>e", "<Cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>", opts)
-            buf_set_keymap("n", "[d", "<Cmd>lua vim.lsp.diagnostic.goto_prev()<CR>", opts)
-            buf_set_keymap("n", "]d", "<Cmd>lua vim.lsp.diagnostic.goto_next()<CR>", opts)
-            buf_set_keymap("n", "<space>q", "<Cmd>lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
-            buf_set_keymap("n", "<space>f", "<Cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-          end,
-          settings = {
-            -- Your tsserver settings here
-          },
+          -- ESLint for linting
+          null_ls.builtins.diagnostics.eslint_d.with({
+            filetypes = { "javascript", "typescript", "vue", "ts", "js" },
+          }),
+          null_ls.builtins.code_actions.eslint_d,
+
+          -- Stylua for Lua formatting
+          null_ls.builtins.formatting.stylua.with({
+            filetypes = { "lua" },
+          }),
         },
-      },
-    },
+      })
+
+      -- -- Disable formatting in TSServer to avoid conflicts with Prettier
+      -- lspconfig.tsserver.setup({
+      --   on_attach = function(client)
+      --     client.server_capabilities.documentFormattingProvider = false -- Disable TSServer formatting
+      --   end,
+      -- })
+
+      -- Disable formatting in ESLint to avoid conflicts
+      lspconfig.eslint_d.setup({
+        on_attach = function(client)
+          client.server_capabilities.documentFormattingProvider = false -- Disable ESLint formatting
+        end,
+      })
+
+      -- Format on save using null-ls (Prettier and Stylua)
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.js", "*.ts", "*.vue", "*.json", "*.lua" }, -- Auto format for these file types
+        callback = function()
+          vim.lsp.buf.format({ async = true })                    -- Trigger formatting on save
+        end,
+      })
+
+      -- Other LSP configurations (CSS, HTML, etc.)
+      lspconfig.cssls.setup({})
+      lspconfig.html.setup({})
+      lspconfig.jsonls.setup({})
+      lspconfig.tailwindcss.setup({})
+      lspconfig.yamlls.setup({})
+    end,
   },
 }
