@@ -43,12 +43,6 @@ return {
           client.server_capabilities.documentFormattingProvider = false -- Disable formatting in ESLint D
         end,
       },
-      -- ESLint D setup for diagnostics only (no formatting)
-      eslint_d = {
-        on_attach = function(client)
-          client.server_capabilities.documentFormattingProvider = false -- Disable formatting in ESLint D
-        end,
-      },
       -- Prettierd setup for formatting on save
       null_ls = {
         sources = {
